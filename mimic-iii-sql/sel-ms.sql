@@ -60,11 +60,14 @@ from mimiciii.ms_patients
   
 select * from mimiciii.list_subject_id_ms_diag_icd_notes
 
+-- Selected MS patients by gender
 SELECT p.gender,count(p.subject_id)
 FROM mimiciii.patients p
 INNER JOIN mimiciii.list_subject_id_ms_diag_icd_notes msp ON p.subject_id = msp.subject_id
 GROUP BY p.gender;
 
+
+-- Total number of note events for select MS patients
 select count(mn.row_id)
 from mimiciii.noteevents mn
 where subject_id in (
@@ -73,6 +76,7 @@ where subject_id in (
 	INNER JOIN mimiciii.list_subject_id_ms_diag_icd_notes mp ON p.subject_id = mp.subject_id
 )
 
+-- Number of note events for each selected MS patient
 select subject_id, count(mn.row_id)
 from mimiciii.noteevents mn
 where subject_id in (
@@ -81,4 +85,4 @@ where subject_id in (
 	INNER JOIN mimiciii.list_subject_id_ms_diag_icd_notes mp ON p.subject_id = mp.subject_id
 )
 group by subject_id
-order by count(mn.row_id)
+order by count(mn.row_id) desc
