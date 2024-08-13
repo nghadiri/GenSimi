@@ -1,6 +1,14 @@
 import pandas as pd
 import os
 
+from util.config import load_app_settings
+
+#settings = load_app_settings()
+
+#inputdir=settings['directories']['input_dir']
+#targetdir=settings['directories']['input_dir']
+#ddir=settings['directories']['def_dir']
+
 # Define paths
 main_folder = "F:\C\Data\MIMIC-III\csv"
 selected_folder = "F:\C\Data\MIMIC-III\Selected"

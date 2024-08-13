@@ -11,22 +11,12 @@ Original file is located at
 
 import pandas as pd
 
-#from google.colab import drive
-#drive.mount('/content/gdrive')
+from util.config import load_app_settings
+settings = load_app_settings()
 
-#basedir = '/content/gdrive/My Drive/data/MIMIC3/'
-#readdir = basedir+'samp1000patient_10_to_20_notes/'
-#readdir = basedir+'samp10patient_10_to_20_notes/'
-#targetdir = basedir+'samp10patient_10_to_20_notes/'
-
-#basedir="C:\\Proj\\simi\\"
-#readdir = basedir+'Input\\MIMIC3\\samp1000\\'
-#mimicdir = basedir+'Input\\MIMIC3\\'
-#targetdir = basedir+"Output\\samp1000\\"
-
-inputdir="C:\\C\\MEGA\\Data.my\\Input\\Selected\\"
-targetdir=inputdir
-ddir="C:\\C\\MEGA\\Data.my\\Input\\D\\"
+inputdir=settings['directories']['input_dir']
+targetdir=settings['directories']['input_dir']
+ddir=settings['directories']['def_dir']
 
 data=pd.read_csv(inputdir+'PRESCRIPTIONS.csv')
 

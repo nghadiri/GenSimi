@@ -34,21 +34,14 @@ Step 1: Detect sections in Clinical Notes
 
 import pandas as pd
 
-#basedir="C:\\Proj\\simi\\"
-#readdir = basedir+'Input\\MIMIC3\\samp1000\\'
-#mimicdir = basedir+'Input\\MIMIC3\\'
-#targetdir = basedir+"Output\\samp1000\\"
+from util.config import load_app_settings
+settings = load_app_settings()
 
-
-inputdir="C:\\C\\MEGA\\Data.my\\Input\\Selected\\"
-targetdir=inputdir
-ddir="C:\\C\\MEGA\\Data.my\\Input\\D\\"
+inputdir=settings['directories']['input_dir']
+targetdir=settings['directories']['input_dir']
+ddir=settings['directories']['def_dir']
 
 df_notes=pd.read_csv(inputdir+'NOTEEVENTS.csv')
-#df_notes
-
-#with open("/content/mydrive/My Drive/example_discharge_summary.txt") as f:
-#    text = f.read()
 
 import spacy;
 import medspacy
