@@ -68,7 +68,8 @@ def main():
     # Extract patient info (you might need to adjust these regex patterns)
     subject_id = re.search(r'Age:\s*(\d+)', ehr_content).group(1)
     hadm_id = '1'  # Assuming one admission per file, you might need to extract this differently
-    chartdate = re.search(r'Date:\s*(\d{4}-\d{2}-\d{2})', ehr_content).group(1)
+    #chartdate = re.search(r'Date:\s*(\d{4}-\d{2}-\d{2})', ehr_content).group(1)
+    chartdate = re.search(r'Date:\s*(\d{4}-\d{2}-\d{2})', ehr_content)
 
     sections, concepts = extract_sections_and_concepts(ehr_content)
 
