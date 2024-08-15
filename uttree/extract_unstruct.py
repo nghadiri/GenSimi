@@ -2,26 +2,29 @@ import pandas as pd
 import spacy
 import medspacy
 import re
-from negspacy.negation import Negex
+#from negspacy.negation import Negex
 from negspacy.termsets import termset
-from scispacy.linking import EntityLinker
+#from scispacy.linking import EntityLinker
 from tqdm import tqdm
 import logging
+from typing import List, Dict
+
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from util.config import load_app_settings
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def load_config():
-    """Load configuration settings."""
-    # You can replace this with a proper config file reader if needed
+def load_settings() -> Dict:
+    settings = load_app_settings()
     return {
-        'input_dir': 'path/to/input/',
-        'output_dir': 'path/to/output/',
+        'input_dir': settings['directories']['input_dir'],
+        'target_dir': settings['directories']['input_dir'],
+        'def_dir': settings['directories']['def_dir'],
         'batch_size': 1000,  # Process this many rows at a time
     }
 
@@ -106,7 +109,7 @@ def process_batch(batch, nlp, nlp_ner):
     return pd.DataFrame(entities)
 
 def main():
-    config = load_config()
+    config = load_app_settings()
     nlp, nlp_ner = setup_nlp()
 
     # Load data

@@ -60,7 +60,7 @@ for i in range(df_notes.shape[0]):
   #CHARTDATE='2146/07/28'
   CHARTDATE=df_notes.iloc[i]['CHARTDATE']
   text=df_notes.iloc[i]['TEXT']
-  print("Processing note %f" %i)
+  print("Processing note %i" %i)
   doc = nlp(text)
   ls_notes=[]
   for j in range(len(doc._.sections)):
@@ -132,7 +132,7 @@ list_Cui=[]
 list_Exception=[]
 
 for i in range(len(df)):
-            print('Processing note %f' %i)
+            print('Processing concepts of note %i' %i)
             #CATEGORY='Discharge summary
             text= str(df.iloc[i]['body_span_Without_line'])
             HADM_ID	=df.iloc[i]['HADM_ID']

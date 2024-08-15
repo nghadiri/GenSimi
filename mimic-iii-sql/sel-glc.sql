@@ -80,7 +80,7 @@ SELECT *
 INTO mimiciii.list_subject_id_glc_diag_icd_notes
 from mimiciii.glc_patients
   
-select * from mimiciii.list_subject_id_glc_diag_icd_notes
+select subject_id from mimiciii.list_subject_id_glc_diag_icd_notes
 
 -- Selected GLC patients by gender
 SELECT p.gender,count(p.subject_id)
