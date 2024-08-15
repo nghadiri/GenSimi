@@ -1,7 +1,11 @@
 import pandas as pd
 import os
+#import sys
 
-from util.config import load_app_settings
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+#from util.config import load_app_settings
 
 #settings = load_app_settings()
 
@@ -11,7 +15,7 @@ from util.config import load_app_settings
 
 # Define paths
 main_folder = "F:\C\Data\MIMIC-III\csv"
-selected_folder = "F:\C\Data\MIMIC-III\Selected"
+selected_folder = "C:\C\MEGA\Data.my\Input\Selected"
 subject_file = os.path.join(selected_folder, "subject-sel.csv")
 
 # Read selected subject IDs

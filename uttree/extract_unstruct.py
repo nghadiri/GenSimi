@@ -8,6 +8,9 @@ from scispacy.linking import EntityLinker
 from tqdm import tqdm
 import logging
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Set up logging
