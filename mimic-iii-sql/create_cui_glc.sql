@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS mimiciii.sel_cui_glc (
 );
 
 
-COPY mimiciii.sel_cui_ms (R,HADM_ID, SUBJECT_ID, CHARTDATE, category_Inner, negex, entity_text, first_cuid, canonical_name, "label")
+COPY mimiciii.sel_cui_glc (R,HADM_ID, SUBJECT_ID, CHARTDATE, category_Inner, negex, entity_text, first_cuid, canonical_name, "label")
 FROM 'C:\C\MEGA\Data.my\Input\Selected-glc\cui.csv' 
 WITH CSV HEADER;
 

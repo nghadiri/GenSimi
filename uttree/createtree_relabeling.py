@@ -117,7 +117,7 @@ for i in range(len(L2_Retro)):
 
         PG.add_node('Demographic' + '-' +str(PG.number_of_nodes()) ,value='Femail_40')
         PG.add_edge(L2_Retro[i] ,'Demographic' + '-' +str(PG.number_of_nodes()-1) )
-#-------------------------------------------------------------------------------------------------------
+
 L2_New_Finding=[x for x,y in PG.nodes(data=True) if list(y.keys())==['TE'] and list(y.values())==['New_Finding']]
 
 for i in range(len(L2_New_Finding)):
@@ -130,7 +130,6 @@ for i in range(len(L2_New_Finding)):
       PG.add_node(Ls_Event_New_Finding[j][0]+ '-' +str(PG.number_of_nodes()),value=Ls_Event_New_Finding[j][1])
       PG.add_edge(L2_New_Finding[i],Ls_Event_New_Finding[j][0]+ '-' +str(PG.number_of_nodes()-1))
 
-#---------------------------------------------------------------------------------------------------------
 
 L2_RealTime=[x for x,y in PG.nodes(data=True) if list(y.keys())==['TE'] and list(y.values())==['RealTime']]
 
@@ -144,20 +143,12 @@ for i in range(len(L2_RealTime)):
       PG.add_node(Ls_Event_RealTime[j][0]+ '-' +str(PG.number_of_nodes()),value=Ls_Event_RealTime[j][1])
       PG.add_edge(L2_RealTime[i],Ls_Event_RealTime[j][0]+ '-' +str(PG.number_of_nodes()-1))
 
-#---------------------------------------------------------------------------------------------------------
 remove_nodes=[]
 for node in PG.nodes:
    if (nx.shortest_path_length(PG, source='PID', target=node)==2 and PG.out_degree(node)==0):
      remove_nodes.append(node)
 for i in remove_nodes:
   PG.remove_node(i)
-#---------------------------------------------------------------------------------------------------------
-pos = hierarchy_pos(PG,'PID')
-
-plt.figure(1)
-plt.figure(2,figsize=(20,5))
-nx.draw(PG, pos=pos,with_labels=True,node_size = 200,node_color = 'cyan')
-plt.show()
 
 """**Relabeling Lavel 3**"""
 
@@ -176,15 +167,6 @@ for i in L3_nodes:
 
   mapping = {i:new_label_1 }
   PG = nx.relabel_nodes(PG, mapping)
-
-
-pos = hierarchy_pos(PG,'PID')
-plt.figure(1)
-plt.figure(2,figsize=(20,5))
-nx.draw(PG, pos=pos,with_labels=True,node_size = 200,node_color = 'cyan')
-plt.show()
-
-#--------------------------------------------------------------------------------
 
 """**Relabeling Lavel 2**"""
 
@@ -206,12 +188,6 @@ for i in L2_nodes:
   PG = nx.relabel_nodes(PG, mapping)
 
 
-pos = hierarchy_pos(PG,'PID')
-plt.figure(1)
-plt.figure(2,figsize=(20,5))
-nx.draw(PG, pos=pos,with_labels=True,node_size = 200,node_color = 'cyan')
-plt.show()
-
 """**Relabeling Lavel 1**"""
 
 D=dict(nx.bfs_predecessors(PG, 'PID'))
@@ -224,11 +200,6 @@ mapping = {'PID':new_label_1}
 PG = nx.relabel_nodes(PG, mapping)
 root=new_label_1
 
-pos = hierarchy_pos(PG,new_label_1)
-plt.figure(1)
-plt.figure(2,figsize=(20,5))
-nx.draw(PG, pos=pos,with_labels=True,node_size = 200,node_color = 'cyan')
-plt.show()
 
 """**Create final String**"""
 
@@ -239,69 +210,5 @@ print(T)
 bfs_string=list(T.nodes())
 s1=bfs_string[0].replace('__','_')
 s2=re.sub(r"(-[1-9][0-9]*)", r"", s1)
-s2
+print(s2)
 
-"""#Toy Example for Relabeling
-
----
-
-
-"""
-
-G=nx.Graph()
-G.add_node(1)
-G.add_node(2)
-G.add_node(3)
-G.add_node(0)
-G.add_edge(1,2)
-G.add_edge(1,3)
-G.add_edge(0,1)
-G.add_edge(0,4)
-root=0
-#--------------------------------------
-pos = hierarchy_pos(G,0)      # positions for all nodes
-plt.figure(1)
-plt.figure(2,figsize=(2,2))
-color_map = ['red' if node == root else 'cyan' for node in G]
-nx.draw(G,with_labels=True,node_size = 400,node_color=color_map)
-plt.show()
-#--------------------------------------
-
-D=dict(nx.bfs_predecessors(G, 0))
-print(D)
-
-L_D_1=[str(k) for k,v in D.items() if str(v) == '1']
-new_label_1='-'.join(L_D_1)
-
-mapping = {1:new_label_1}
-G = nx.relabel_nodes(G, mapping)
-
-plt.figure(1)
-plt.figure(2,figsize=(2,2))
-color_map = ['red' if node == root else 'cyan' for node in G]
-nx.draw(G,with_labels=True,node_size = 400,node_color=color_map)
-plt.show()
-#--------------------------------------
-D=dict(nx.bfs_predecessors(G, 0))
-print(D)
-
-L_D_0=[str(k) for k,v in D.items() if str(v) == '0']
-new_label_0='-'.join(L_D_0)
-print(new_label_0)
-mapping = {0:new_label_0}
-root=new_label_0
-G = nx.relabel_nodes(G, mapping)
-
-plt.figure(1)
-plt.figure(2,figsize=(2,2))
-color_map = ['red' if node == root else 'cyan' for node in G]
-nx.draw(G,with_labels=True,node_size = 400,node_color=color_map)
-plt.show()
-
-#--------------------------------------
-
-
-T = nx.bfs_tree(G, source=root)
-print(T)
-bfs_string=list(T.nodes())
-bfs_string
