@@ -10,7 +10,7 @@ from util.config import load_app_settings
 settings = load_app_settings()
 
 inputdir=settings['directories']['input_dir']
-targetdir=settings['directories']['target_dir']
+targetdir=settings['directories']['target_dir']+"proc\\"
 ddir=settings['directories']['def_dir']
 
 def process_cui_csv(file_path):

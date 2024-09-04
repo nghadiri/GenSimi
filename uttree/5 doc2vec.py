@@ -2,6 +2,9 @@ import os
 import pandas as pd
 import time
 import nltk
+import sys
+import psycopg2
+
 
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
@@ -9,8 +12,14 @@ from string import digits
 
 nltk.download('punkt')
 
+# first the two, then get hadm-subject-sel-glc.csv from pg, then third
+_train=False
+_insert_db=False
+_write_csv=True
+
+
 # Load app settings (make sure this function and its dependencies are working)
-import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from util.config import load_app_settings
 settings = load_app_settings()
@@ -25,7 +34,7 @@ sen = pd.DataFrame({'ID': [], 'doc': []})
 directory = os.path.join(inputdir, "proc", "merged")
 
 # Read all xxxxxx-merged.txt files from the directory
-dataframes = []c
+dataframes = []
 for filename in os.listdir(directory):
     if filename.endswith("-merged.txt"):
         admission_id = filename.split("-merged.txt")[0]
@@ -47,54 +56,100 @@ sen['cleanDoc'] = sen['doc'].apply(lambda x: remove_digits_from_list([x])[0])
 # Prepare data for Doc2Vec
 data = list(sen.cleanDoc)
 tagged_data = [TaggedDocument(words=word_tokenize(_d.lower()), tags=[str(i)]) for i, _d in enumerate(data)]
-
-# Doc2Vec model parameters
-start = time.time()
-max_epochs = 20  # Increased epochs for better training
-vector_size = 200
-alpha = 0.025
-
-model = Doc2Vec(vector_size=vector_size,
-                alpha=alpha,
-                min_alpha=0.0001,
-                min_count=5,
-                dm=0,  # PV-DBOW
-                negative=5,
-                workers=4)  # Reduced workers for better compatibility
-
-model.build_vocab(tagged_data)
-
-# Train the Doc2Vec model
-for epoch in range(max_epochs):
-    print(f'iteration {epoch}')
-    model.train(tagged_data,
-                total_examples=model.corpus_count,
-                epochs=model.epochs)
-    model.alpha -= 0.0002
-    model.min_alpha = model.alpha
-
 model_save_path = os.path.join(targetdir, "d2v.model")
-model.save(model_save_path)
-end = time.time()
-print(f"Model Saved in {end - start} seconds")
 
-# Create DataFrame for embedded vectors
-list_Subject_id = sen.ID.tolist()  # Get a list of all IDs
-list_total = [model.dv[i] for i in range(len(list_Subject_id))]
+if _train:
+    # Doc2Vec model parameters
+    start = time.time()
+    max_epochs = 20  # Increased epochs for better training
+    vector_size = 200
+    alpha = 0.025
 
-# Generate column names for the vectors
-list_columns_name = [f'f{i}' for i in range(vector_size)]
+    model = Doc2Vec(vector_size=vector_size,
+                    alpha=alpha,
+                    min_alpha=0.0001,
+                    min_count=5,
+                    dm=0,  # PV-DBOW
+                    negative=5,
+                    workers=4)  # Reduced workers for better compatibility
 
-# Create DataFrame with vectors and admission_Id
-EmbeddedVector = pd.DataFrame(list_total, columns=list_columns_name)
-EmbeddedVector['admission_Id'] = list_Subject_id
+    model.build_vocab(tagged_data)
 
-embedded_vectors_path = os.path.join(targetdir, "embedded_vectors.csv")
-# Save the vectors DataFrame to a CSV file
-from gensim.models import Doc2Vec
-model = Doc2Vec.load(model_save_path)
-vector_length = model.vector_size
-print("Vector Length:", vector_length)
+    # Train the Doc2Vec model
+    for epoch in range(max_epochs):
+        print(f'iteration {epoch}')
+        model.train(tagged_data,
+                    total_examples=model.corpus_count,
+                    epochs=model.epochs)
+        model.alpha -= 0.0002
+        model.min_alpha = model.alpha
 
-#EmbeddedVector.to_csv(embedded_vectors_path, index=False)
+    
+    model.save(model_save_path)
+    end = time.time()
+    print(f"Model Saved in {end - start} seconds")
+else:
+    model = Doc2Vec.load(model_save_path)
 
+if _insert_db:
+    conn = psycopg2.connect(
+        dbname="postgres",
+        user=settings['database']['user'],
+        password=settings['database']['password'],
+        host=settings['database']['host'],
+        port= settings['database']['port']
+    )
+    cur = conn.cursor()
+
+    # Prepare the insert statement for PostgreSQL
+    insert_query = """
+        INSERT INTO mimiciii.vectors_ms (hadm_id, embedding)
+        VALUES (%s, %s)
+        ON CONFLICT (hadm_id) DO NOTHING;
+    """
+
+    # Generate vectors and insert them into the PostgreSQL table
+    list_Subject_id = sen.ID.tolist()  # Get a list of all IDs
+    for i in range(len(list_Subject_id)):
+        admission_id = int(list_Subject_id[i])  # Convert to integer
+        print(f"Inserting {admission_id} ...")
+        vector = model.dv[i].tolist()  # Convert the vector to a list
+        vector_str = f"[{', '.join(map(str, vector))}]"  # Convert to the string format required by pgvector
+
+        # Insert the admission ID and vector into the table
+        cur.execute(insert_query, (admission_id, vector_str))
+
+    # Commit the transaction and close the connection
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    print("Vectors successfully stored in PostgreSQL.")
+
+if _write_csv:
+    hadm_subject_df = pd.read_csv(os.path.join(inputdir, "hadm-subject-sel-ms.csv"))
+
+    combined_data = []
+
+    # Generate vectors and insert them into the PostgreSQL table
+    list_Subject_id = sen.ID.tolist()  # Get a list of all IDs
+    for i in range(len(list_Subject_id)):
+        admission_id = int(list_Subject_id[i])  # Convert to integer
+        vector = model.dv[i].tolist()  # Convert the vector to a list
+        vector_str = f"[{', '.join(map(str, vector))}]"  # Convert to the string format required by pgvector
+    
+        # Find the corresponding subject_id from hadm_subject_df
+        subject_id = hadm_subject_df.loc[hadm_subject_df['hadm_id'] == admission_id, 'subject_id'].values[0]
+        
+        # Append the data for CSV
+        combined_data.append([subject_id, admission_id] + vector)
+    
+    # Step 3: Create a DataFrame with the combined data
+    columns = ['subject_id', 'hadm_id'] + [f'vector_{i}' for i in range(len(vector))]
+    combined_df = pd.DataFrame(combined_data, columns=columns)
+
+    # Step 4: Write the DataFrame to a CSV file
+    output_file_path = os.path.join(targetdir, "subj_hadm_vectors.csv")
+    combined_df.to_csv(output_file_path, index=False)
+
+    print(f"Vectors successfully written to {output_file_path}.")
