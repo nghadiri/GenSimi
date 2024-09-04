@@ -11,11 +11,11 @@ from nltk.tokenize import word_tokenize
 from string import digits
 
 nltk.download('punkt')
-
+nltk.download('punkt_tab')
 # first the two, then get hadm-subject-sel-glc.csv from pg, then third
 _train=False
-_insert_db=False
-_write_csv=True
+_insert_db=True
+_write_csv=False
 
 
 # Load app settings (make sure this function and its dependencies are working)
@@ -93,7 +93,7 @@ else:
 
 if _insert_db:
     conn = psycopg2.connect(
-        dbname="postgres",
+        dbname=settings['database']['dbname'],
         user=settings['database']['user'],
         password=settings['database']['password'],
         host=settings['database']['host'],
@@ -103,7 +103,7 @@ if _insert_db:
 
     # Prepare the insert statement for PostgreSQL
     insert_query = """
-        INSERT INTO mimiciii.vectors_ms (hadm_id, embedding)
+        INSERT INTO mimiciii.vectors_glc (hadm_id, embedding)
         VALUES (%s, %s)
         ON CONFLICT (hadm_id) DO NOTHING;
     """
