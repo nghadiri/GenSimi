@@ -131,3 +131,43 @@ CREATE TABLE diagnoses_icd (
 );
 
 COPY DIAGNOSES_ICD FROM 'C:\C\Data\mimiciii\csv\DIAGNOSES_ICD.csv' DELIMITER ',' CSV HEADER;
+
+-- Create and import ICUSTAYS table
+CREATE TABLE mimiciii.icustays (
+    row_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    hadm_id INT NOT NULL,
+    icustay_id INT NOT NULL,
+    dbsource VARCHAR(20),
+    first_careunit VARCHAR(20),
+    last_careunit VARCHAR(20),
+    first_wardid SMALLINT,
+    last_wardid SMALLINT,
+    intime TIMESTAMP,
+    outtime TIMESTAMP,
+    los DOUBLE PRECISION,
+    CONSTRAINT icustays_rowid_pk PRIMARY KEY (row_id)
+);
+drop table icustays
+COPY icustays FROM 'C:\C\Data\ICUSTAYS.csv' DELIMITER ',' CSV HEADER;
+
+-- Create and import CHARTEVENTS table
+CREATE TABLE chartevents (
+    row_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    hadm_id INT,
+    icustay_id INT,
+    itemid INT,
+    charttime TIMESTAMP,
+    storetime TIMESTAMP,
+    cgid INT,
+    value VARCHAR(200),
+    valuenum DOUBLE PRECISION,
+    valueuom VARCHAR(20),
+    warning INT,
+    error INT,
+    resultstatus VARCHAR(20),
+    stopped VARCHAR(20),
+    CONSTRAINT chartevents_rowid_pk PRIMARY KEY (row_id)
+);
+COPY chartevents FROM 'C:\C\Data\mimiciii\csv\CHARTEVENTS.csv' DELIMITER ',' CSV HEADER;
