@@ -148,11 +148,11 @@ CREATE TABLE mimiciii.icustays (
     los DOUBLE PRECISION,
     CONSTRAINT icustays_rowid_pk PRIMARY KEY (row_id)
 );
-drop table icustays
-COPY icustays FROM 'C:\C\Data\ICUSTAYS.csv' DELIMITER ',' CSV HEADER;
+
+COPY mimiciii.icustays FROM 'F:\C\Data\MIMIC-III\csv\ICUSTAYS.csv' DELIMITER ',' CSV HEADER;
 
 -- Create and import CHARTEVENTS table
-CREATE TABLE chartevents (
+CREATE TABLE mimiciii.chartevents (
     row_id INT NOT NULL,
     subject_id INT NOT NULL,
     hadm_id INT,
@@ -170,4 +170,4 @@ CREATE TABLE chartevents (
     stopped VARCHAR(20),
     CONSTRAINT chartevents_rowid_pk PRIMARY KEY (row_id)
 );
-COPY chartevents FROM 'C:\C\Data\mimiciii\csv\CHARTEVENTS.csv' DELIMITER ',' CSV HEADER;
+COPY mimiciii.chartevents FROM 'F:\C\Data\MIMIC-III\csv\CHARTEVENTS.csv' DELIMITER ',' CSV HEADER;
