@@ -42,17 +42,37 @@ class Neo4jLoader:
 
     def load_lab_events(self, lab_events_df: pd.DataFrame):
         with self.driver.session() as session:
+            cnt=0
             for _, row in lab_events_df.iterrows():
                 lab_data = dict(row)
                 lab_data['id'] = f"LAB_{lab_data['row_id']}"
                 session.execute_write(self._create_lab_event, lab_data)
+                cnt += 1
+                if cnt % 100 == 0:  # Print progress every 100 labs
+                    print(f"Processed {cnt} lab events (abnormal only)")
 
     def load_prescriptions(self, prescriptions_df: pd.DataFrame):
         with self.driver.session() as session:
+            cnt=0
             for _, row in prescriptions_df.iterrows():
                 prescription_data = dict(row)
                 prescription_data['id'] = f"PRESCRIPTION_{prescription_data['row_id']}"
                 session.execute_write(self._create_prescription, prescription_data)
+                cnt += 1
+                if cnt % 100 == 0:  # Print progress every 100 prescriptions
+                    print(f"Processed {cnt} prescriptions")
+    
+    def load_note_events(self, notes_df: pd.DataFrame):
+        with self.driver.session() as session:
+            cnt=0
+            for _, row in notes_df.iterrows():
+                note_data = dict(row)
+                note_data['id'] = f"NOTE_{note_data['row_id']}"
+                session.execute_write(self._create_note_event, note_data)
+                cnt += 1
+                if cnt % 100 == 0:  # Print progress every 100 notes
+                    print(f"Processed {cnt} notes")
+
 
     @staticmethod
     def _create_patient(tx, patient_data):
@@ -104,22 +124,46 @@ class Neo4jLoader:
                hadm_id=prescription_data['hadm_id'],
                id=prescription_data['id'],
                prescription_data=prescription_data)
+        
+        @staticmethod
+        def _create_note_event(tx, note_data):
+            query = """
+            MATCH (a:Admission {hadm_id: $hadm_id})
+            CREATE (n:NoteEvent {id: $id})
+            SET n += $note_data
+            WITH a, n
+            CREATE (a)-[r:HAS_NOTE]->(n)
+            """
+            tx.run(query,
+                hadm_id=note_data['hadm_id'],
+                id=note_data['id'],
+                note_data=note_data)
 
-def filter_data_for_admissions(admissions_df, patients_df, lab_events_df, prescriptions_df, vectors_df, n_samples=50):
+def filter_data_for_admissions(admissions_df, patients_df, lab_events_df, prescriptions_df, vectors_df, notes_df, n_samples=10):
     # Randomly select n admissions
-    sampled_admissions = admissions_df.sample(n=n_samples, random_state=42)
-    
+    #sampled_admissions = admissions_df.sample(n=n_samples, random_state=42)
+    sampled_vectors = vectors_df.sample(n=n_samples, random_state=42)
     # Get related data
-    selected_hadm_ids = sampled_admissions['hadm_id'].tolist()
+    #selected_hadm_ids = sampled_admissions['hadm_id'].tolist()
+    selected_hadm_ids = sampled_vectors['admission_id'].tolist()
+    sampled_admissions = admissions_df[admissions_df['hadm_id'].isin(selected_hadm_ids)]
     selected_subject_ids = sampled_admissions['subject_id'].tolist()
     
     # Filter related data
     filtered_patients = patients_df[patients_df['subject_id'].isin(selected_subject_ids)]
-    filtered_labs = lab_events_df[lab_events_df['hadm_id'].isin(selected_hadm_ids)]
+    filtered_labs = lab_events_df[
+        (lab_events_df['hadm_id'].isin(selected_hadm_ids)) & 
+        (lab_events_df['flag'].notna()) &  # Not null flag
+        (lab_events_df['flag'].str.lower().isin(['abnormal', 'abn', 'abormal', 'ab', 'abn.']))
+    ]
     filtered_prescriptions = prescriptions_df[prescriptions_df['hadm_id'].isin(selected_hadm_ids)]
-    filtered_vectors = vectors_df[vectors_df['admission_id'].isin(selected_hadm_ids)]
-    
-    return filtered_patients, sampled_admissions, filtered_labs, filtered_prescriptions, filtered_vectors
+    #filtered_vectors = vectors_df[vectors_df['admission_id'].isin(selected_hadm_ids)]
+    filtered_vectors = sampled_vectors
+    filtered_notes = notes_df[notes_df['hadm_id'].isin(selected_hadm_ids)].copy()
+    filtered_notes['word_count'] = filtered_notes['text'].str.split().str.len()
+    filtered_notes = filtered_notes[filtered_notes['word_count'] > 50]
+    filtered_notes = filtered_notes.drop('word_count', axis=1)
+    return filtered_patients, sampled_admissions, filtered_labs, filtered_prescriptions, filtered_vectors, filtered_notes
 
 # Usage example:
 if __name__ == "__main__":
@@ -146,13 +190,30 @@ if __name__ == "__main__":
 
         vectors_df = pd.read_csv(os.path.join(inputdir, "embedded_vectors.csv"))
         vectors_df.columns = vectors_df.columns.str.lower()
+
+        # Load data with lowercase column names
+        notes_df = pd.read_csv(os.path.join(inputdir, "noteevents.csv"))
+        notes_df.columns = notes_df.columns.str.lower()
+
         # Rename admission_Id to admission_id for consistency
         if 'admission_id' not in vectors_df.columns and 'admission_id' in vectors_df.columns:
             vectors_df = vectors_df.rename(columns={'admission_id': 'admission_id'})
 
         # Filter data for 50 random admissions
-        filtered_patients, filtered_admissions, filtered_labs, filtered_prescriptions, filtered_vectors = \
-            filter_data_for_admissions(admissions_df, patients_df, lab_events_df, prescriptions_df, vectors_df)
+        filtered_patients, filtered_admissions, filtered_labs, filtered_prescriptions, filtered_vectors, filtered_notes = \
+            filter_data_for_admissions(admissions_df, patients_df, lab_events_df, prescriptions_df, vectors_df, notes_df)
+       
+        # Print sizes of filtered dataframes
+        print("\nFiltered DataFrame Sizes:")
+        print(f"{'DataFrame':<15} {'Rows':>10} {'Columns':>10}")
+        print("-" * 35)
+        print(f"{'Patients':<15} {len(filtered_patients):>10} {len(filtered_patients.columns):>10}")
+        print(f"{'Admissions':<15} {len(filtered_admissions):>10} {len(filtered_admissions.columns):>10}")
+        print(f"{'Labs':<15} {len(filtered_labs):>10} {len(filtered_labs.columns):>10}")
+        print(f"{'Prescriptions':<15} {len(filtered_prescriptions):>10} {len(filtered_prescriptions.columns):>10}")
+        print(f"{'Vectors':<15} {len(filtered_vectors):>10} {len(filtered_vectors.columns):>10}\n")
+        print(f"{'Notes':<15} {len(filtered_notes):>10} {len(filtered_notes.columns):>10}\n")
+
 
         # Load filtered data
         print("Loading patients...")
@@ -163,6 +224,8 @@ if __name__ == "__main__":
         loader.load_lab_events(filtered_labs)
         print("Loading prescriptions...")
         loader.load_prescriptions(filtered_prescriptions)
+        print("Loading notes...")
+        loader.load_note_events(filtered_notes)
 
         print("Data loading completed successfully!")
 
