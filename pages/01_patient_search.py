@@ -23,28 +23,25 @@ vector_index_name='admission_vector'
 
 # Define the graph retrieval query for hybrid search
 graph_retrieval_query = """
-WITH node AS searchAdmission, score AS searchScore
-MATCH (searchAdmission)
-WITH searchAdmission, searchScore
-MATCH (searchAdmission)-[:HAS_LAB]->(lab:LabEvent)
-WITH searchAdmission, collect(lab) as labs, searchScore
-MATCH (searchAdmission)-[:HAS_PRESCRIPTION]->(med:Prescription)
-WITH searchAdmission, labs, collect(med) as meds, searchScore
-OPTIONAL MATCH (searchAdmission)-[:HAS_NOTE]->(note:NoteEvent)
-WITH searchAdmission, labs, meds, collect(note) as notes, searchScore
+WITH node AS admission, score
+MATCH (admission)-[:HAS_LAB]->(lab:LabEvent)
+WITH admission, score, collect(lab) as labs
+OPTIONAL MATCH (admission)-[:HAS_PRESCRIPTION]->(med:Prescription)
+WITH admission, score, labs, collect(med) as meds
+OPTIONAL MATCH (admission)-[:HAS_NOTE]->(note:NoteEvent)
+WITH admission, score, labs, meds, collect(note) as notes
 RETURN 
-    searchAdmission.diagnosis AS text,
-    searchScore AS score,
+    admission.diagnosis AS text,
+    score,
     {
-        admission_id: searchAdmission.hadm_id,
-        diagnosis: searchAdmission.diagnosis,
-        labs: [lab IN labs | lab.itemid],
-        medications: [med IN meds | med.drug],
-        notes: [note IN notes | note.text],
-        admission_type: searchAdmission.admission_type
+        admission_id: admission.hadm_id,
+        diagnosis: admission.diagnosis,
+        labs: [l IN labs | l.itemid],
+        medications: [m IN meds | m.drug],
+        notes: [n IN notes | n.text],
+        admission_type: admission.admission_type
     } AS metadata
 ORDER BY score DESC
-LIMIT 5
 """
 
 # Initialize RAG chains

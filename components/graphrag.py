@@ -24,16 +24,19 @@ YIELD node, score
 """
 
 PROMPT_CONTEXT_TEMPLATE = """
-# Medical Case Query
+You are a medical assistant analyzing patient cases. Use the provided similar cases to answer the query.
+
+# Query
 {input}
 
-# Similar Cases and Context:
+# Similar Cases Information:
 {context}
 
-Please analyze these similar cases and provide:
-1. Key clinical patterns
-2. Notable similarities in lab values, medications, and outcomes
-3. Relevant differences that might affect treatment decisions
+Please analyze these cases considering:
+1. Similar diagnoses and patterns
+2. Lab test patterns
+3. Medication regimens
+4. Clinical notes content
 """
 
 T2C_PROMPT_TEMPLATE_O = '''
