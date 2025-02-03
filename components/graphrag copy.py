@@ -13,26 +13,11 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
-from langchain_community.llms import Ollama
-from langchain_openai import OpenAIEmbeddings
-from langchain.prompts.prompt import PromptTemplate
-from langchain_community.graphs.neo4j_graph import Neo4jGraph
-from langchain_community.vectorstores.neo4j_vector import Neo4jVector
-from langchain_core.documents import Document
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from collections import OrderedDict
-from typing import Dict, List, Optional
-import json
-
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 #llm = ChatOpenAI(temperature=0, model_name='gpt-4o', streaming=True)
+llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
 
-#llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
-#t2c_llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
-
-llm = Ollama(model="mistral", temperature=0)
-t2c_llm = Ollama(model="mistral", temperature=0)
+t2c_llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
 
 VECTOR_QUERY_HEAD = """CALL db.index.vector.queryNodes($index, $k, $embedding)
 YIELD node, score
@@ -141,7 +126,7 @@ class GraphRAGChain:
                  vector_index_name: str,
                  prompt_instructions: str,
                  graph_retrieval_query: str = None,
-                 k: int = 3,  # 5
+                 k: int = 5,
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
@@ -278,7 +263,7 @@ class GraphRAGPreFilterChain:
                  vector_index_name: str,
                  prompt_instructions: str = '',
                  graph_prefilter_query: str = 'MATCH(node) WITH node, {} AS prefilterMetadata',
-                 k: int = 3, # 5
+                 k: int = 5,
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
@@ -368,7 +353,7 @@ class DynamicGraphRAGChain:
                  vector_index_name: str,
                  prompt_instructions: str = '',
                  graph_retrieval_query: str = None,
-                 k: int = 3, # 5
+                 k: int = 5,
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
