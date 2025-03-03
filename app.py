@@ -10,9 +10,10 @@ settings = load_app_settings()
 uri = settings['neo4j']['uri']
 user = settings['neo4j']['user']
 password = settings['neo4j']['password']
-
+os.environ["OLLAMA_API_URL"]="http://10.33.70.51:11434"
 # Optional: Override LLM model if specified in settings
-OLLAMA_MODEL = settings.get('ollama', {}).get('model', 'mistral')
+#OLLAMA_MODEL = settings.get('ollama', {}).get('model', 'mistral')
+OLLAMA_MODEL = settings.get('ollama', {}).get('model', 'medllama2')
 
 # Page Configuration
 st.set_page_config(
