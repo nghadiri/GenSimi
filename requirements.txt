@@ -1,0 +1,9 @@
+transformers>=4.30.0
+torch>=2.0.0
+numpy>=1.22.0
+tqdm>=4.65.0
+medspacy==1.2.0
+medspacy_quickumls==3.2
+medspacy_unqlite==0.9.6
+murmurhash==1.0.10
+negspacy==1.0.4
