@@ -97,6 +97,7 @@ ${context}
 """
 
 
+
 def format_doc(doc: Document) -> Dict:
     res = OrderedDict()
     res['text'] = doc.page_content
@@ -139,14 +140,15 @@ class Neo4jCredentials:
 class GraphRAGChain:
     def __init__(self,
                  vector_index_name: str,
-                 prompt_instructions: str,
+                 prompt_instructions: str = '',
                  graph_retrieval_query: str = None,
-                 k: int = 3,  # 5
+                 k: int = 5,  
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
                  neo4j_database: Optional[str] = None
                  ):
+        
         self.store = Neo4jVector.from_existing_index(
             embedding=embedding_model,
             url=neo4j_uri,
@@ -166,6 +168,8 @@ class GraphRAGChain:
                       | StrOutputParser())
 
         self.last_used_context = None
+        self.last_retrieval_query = None
+        self.last_retrieval_query_params = None
 
         self.k = k
 
@@ -206,29 +210,47 @@ class GraphRAGChain:
         return res
 
     def invoke(self, prompt: str):
+        # Store the query info before invoking
+        self._store_query_info(prompt)
         return self.chain.invoke(prompt)
 
-    def get_full_retrieval_query_template(self):
+    def _store_query_info(self, prompt: str):
+        """Store query information for later retrieval"""
+        # Generate and store embedding
+        embedding = self.store.embedding.embed_query(prompt)
+        
+        # Store query parameters
+        self.last_retrieval_query_params = {
+            'index': self.store.index_name,
+            'k': self.k,
+            'embedding': embedding
+        }
+        
+        # Store query
         query_head = """CALL db.index.vector.queryNodes($index, $k, $embedding)
 YIELD node, score
 """
-        return query_head + self.retrieval_query
-
-    def get_full_retrieval_query(self, prompt: str):
-        query_head = f"""WITH {self.store.embedding.embed_query(prompt)}
-    AS queryVector
-CALL db.index.vector.queryNodes('{self.store.index_name}', {self.k}, queryVector)
-YIELD node, score
-        """
-        return query_head + self.retrieval_query
+        self.last_retrieval_query = query_head + self.retrieval_query
 
     def get_browser_queries(self, prompt: str):
-        params_query = f":params{{index:'{self.store.index_name}', k:{self.k}, embedding:{self.store.embedding.embed_query(prompt)}}}"
-        query_head = """CALL db.index.vector.queryNodes($index, $k, $embedding)
-YIELD node, score
-"""
-        return {'params_query': params_query, 'query_body': query_head + self.retrieval_query}
+        """Get queries for Neo4j browser"""
+        self._store_query_info(prompt)
+        return {
+            'params_query': f":params {json.dumps(self.last_retrieval_query_params)}",
+            'query_body': self.last_retrieval_query
+        }
 
+    def get_last_browser_queries(self):
+        """Get the last executed queries"""
+        if not hasattr(self, 'last_retrieval_query_params') or not hasattr(self, 'last_retrieval_query'):
+            return {
+                'params_query': '',
+                'query_body': ''
+            }
+        return {
+            'params_query': f":params {json.dumps(self.last_retrieval_query_params)}",
+            'query_body': self.last_retrieval_query
+        }
 
 class GraphRAGText2CypherChain:
     def __init__(self,
@@ -278,7 +300,7 @@ class GraphRAGPreFilterChain:
                  vector_index_name: str,
                  prompt_instructions: str = '',
                  graph_prefilter_query: str = 'MATCH(node) WITH node, {} AS prefilterMetadata',
-                 k: int = 3, # 5
+                 k: int = 5,
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
@@ -368,7 +390,7 @@ class DynamicGraphRAGChain:
                  vector_index_name: str,
                  prompt_instructions: str = '',
                  graph_retrieval_query: str = None,
-                 k: int = 3, # 5
+                 k: int = 5, 
                  neo4j_uri: Optional[str] = None,
                  neo4j_username: Optional[str] = None,
                  neo4j_password: Optional[str] = None,
