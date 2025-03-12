@@ -24,6 +24,21 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from collections import OrderedDict
 from typing import Dict, List, Optional
 import json
+import os
+
+#import streamlit as st
+os.environ["OLLAMA_API_URL"]="http://10.33.70.51:11434"
+
+BASE_URL="http://10.33.70.51:11434"
+#from dotenv import load_dotenv
+#load_dotenv()  # load .env file if it exists
+
+# If using Streamlit secrets
+#if 'OPENAI_API_KEY' in st.secrets:
+ #   print("Setting Open AI Key ...")
+    #os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+#else:
+    #print("No openAI key ....")
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 #llm = ChatOpenAI(temperature=0, model_name='gpt-4o', streaming=True)
@@ -31,8 +46,12 @@ embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 #llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
 #t2c_llm = ChatOpenAI(temperature=0, model_name='gpt-4', streaming=True)
 
-llm = Ollama(model="mistral", temperature=0)
-t2c_llm = Ollama(model="mistral", temperature=0)
+#llm = Ollama(model="mistral", temperature=0)
+#t2c_llm = Ollama(model="mistral", temperature=0)
+
+llm = Ollama(base_url=BASE_URL, model="medllama2", temperature=0)
+t2c_llm = Ollama(base_url=BASE_URL,model="medllama2", temperature=0)
+
 
 VECTOR_QUERY_HEAD = """CALL db.index.vector.queryNodes($index, $k, $embedding)
 YIELD node, score
