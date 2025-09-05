@@ -27,9 +27,9 @@ import json
 import os
 
 #import streamlit as st
-os.environ["OLLAMA_API_URL"]="http://10.33.70.51:11434"
+os.environ["OLLAMA_API_URL"]="http://10.10.10.10:11434"
 
-BASE_URL="http://10.33.70.51:11434"
+BASE_URL="http://10.10.10.10:11434"
 #from dotenv import load_dotenv
 #load_dotenv()  # load .env file if it exists
 
