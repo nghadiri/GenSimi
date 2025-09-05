@@ -1,6 +1,20 @@
 # GenSimi - Medical GraphRAG Assistant
 
-A medical GraphRAG (Graph Retrieval-Augmented Generation) assistant that analyzes patient cases using the MIMIC-III dataset. The application provides multiple analysis approaches including vector search, graph-based retrieval, and hybrid methods to help with medical case analysis.
+A medical GraphRAG (Graph Retrieval-Augmented Generation) assistant that analyzes patient cases using the MIMIC-III dataset. Building upon the patient similarity assessment framework from [Patient-Similarity-through-Representation](https://github.com/HodaMemar/Patient-Similarity-through-Representation), this work extends the approach by integrating Graph Retrieval-Augmented Generation techniques to provide enhanced medical case analysis through multiple retrieval strategies.
+
+## About This Work
+
+This project extends the patient similarity assessment methodology described in:
+
+> Memarzadeh, H., Ghadiri, N., Samwald, M., & Lotfi Shahreza, M. (2022). "A study into patient similarity through representation learning from medical records". Knowledge and Information Systems, 64(12), 3293-3324.
+
+The original work presented a novel data representation method for electronic medical records (EMRs) that considers information in clinical narratives. Patient similarity measurement requires converting heterogeneous EMRs into comparable formats to calculate distance. The study proposed an unsupervised approach for building patient representations that integrate unstructured and structured data extracted from patients' EMRs, employing tree structures to model extracted data that capture temporal relations of multiple medical events.
+
+**GenSimi extends this foundation by:**
+- Implementing GraphRAG techniques that combine traditional vector similarity with graph-based medical knowledge retrieval
+- Providing multiple analysis approaches (vector search, graph-based retrieval, and hybrid methods) for comprehensive case analysis  
+- Integrating real-time query processing with contextual medical reasoning using large language models
+- Offering an interactive web interface for comparative analysis across different retrieval strategies
 
 ## Features
 

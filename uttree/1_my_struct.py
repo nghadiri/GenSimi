@@ -1,4 +1,41 @@
 
+"""
+Structured Data Processing Module - UTTree Pipeline
+
+This module processes structured EMR data (prescriptions and laboratory events) 
+to create quadruple data structures for the UTTree methodology.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Structured Data Processing Steps:
+1. Prescription Processing:
+   - Extracts drug information with start/end dates
+   - Creates daily drug administration records
+   - Converts to quadruple format: {time, event_type, entity, value}
+   - Assigns 'RealTime' temporal event type for short-term effects
+
+2. Laboratory Events Processing:
+   - Merges lab events with lab item definitions
+   - Processes lab results and flags (normal/abnormal)
+   - Creates temporal records for each lab test
+   - Maps to quadruple format with 'RealTime' event type
+
+3. Quadruple Data Structure:
+   According to Table 2 in the methodology, each quadruple contains:
+   - Time (t_i): Timestamp of clinical event registration
+   - Temporal Event Type (y_i): Retrospective/NewFinding/RealTime
+   - Event (e_i): Medical event type (disease, drug, lab, etc.)
+   - Value (v_i): Medical event value
+
+This harmonization enables combination of structured and unstructured data
+in the tree construction phase of the UTTree model.
+
+Input: PRESCRIPTIONS.csv, LABEVENTS.csv, D_LABITEMS.csv
+Output: merged_drug_lab.csv containing harmonized quadruple structures
+"""
+
 import pandas as pd
 
 from util.config import load_app_settings

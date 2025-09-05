@@ -1,3 +1,47 @@
+"""
+Document Representation Module - UTTree Doc2Vec Integration
+
+This module implements the final step of the UTTree pipeline by loading
+generated temporal tree sequences into Neo4j for GraphRAG integration.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Document Representation Process:
+
+1. Tree Sequence Integration:
+   - Reads temporal tree sequences from {HADM_ID}-merged.txt files
+   - Matches sequences with existing admission nodes in Neo4j
+   - Updates admission nodes with temporal_tree_string properties
+
+2. Doc2Vec Preparation:
+   - Sequences serve as input documents for Doc2Vec algorithm
+   - Each patient admission becomes a "document" with medical event sequences
+   - Captures co-occurrence patterns and temporal relationships
+
+3. Neo4j Integration:
+   - Links temporal sequences to existing admission data
+   - Enables GraphRAG queries to utilize both graph structure and temporal patterns
+   - Supports hybrid retrieval combining graph relationships and semantic similarity
+
+According to the methodology, Doc2Vec processes these sequences using:
+- Distributed Memory Model (PV-DM): Predicts target words from context
+- Hierarchical softmax optimization
+- Fixed-length vector outputs regardless of input sequence length
+
+The temporal tree strings contain rich compound sequences that demonstrate
+medical event co-occurrences within time windows, enhanced by the
+Weisfeiler-Lehman relabeling process.
+
+This integration enables the GraphRAG system to leverage both:
+- Structured medical knowledge graphs (Neo4j relationships)
+- Temporal patient similarity patterns (UTTree sequences)
+
+Input: {HADM_ID}-merged.txt files containing temporal tree sequences
+Output: Neo4j admission nodes enhanced with temporal_tree_string properties
+"""
+
 from neo4j import GraphDatabase
 import os
 from typing import Dict, Set

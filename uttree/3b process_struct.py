@@ -1,3 +1,40 @@
+"""
+Structured Data Processor - UTTree Quadruple Conversion
+
+This module processes merged structured data (drugs and lab results) and converts
+them into standardized quadruple format for temporal tree construction.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Processing Steps:
+1. Groups structured data by hospital admission (HADM_ID)
+2. Creates temporal ordering based on timestamps
+3. Filters and processes two main event types:
+   - Drug Events: Medications with 'MainDrug' classification
+   - Lab Events: Only abnormal laboratory results
+
+4. Converts to Quadruple Format:
+   - Time: Sequential time window based on unique dates
+   - TemporalEventType: 'RealTime' (short-term effects)
+   - Event: 'MainDrug' for medications, lab name for abnormal results
+   - Value: Drug name or 'abnormal' for lab results
+
+Key Features:
+- Processes only clinically significant events (drugs and abnormal labs)
+- Maintains temporal ordering within each admission
+- Assigns 'RealTime' temporal event type per methodology
+- Creates separate output files for each admission
+
+According to the UTTree methodology, structured data represents real-time events
+with short-term effects that are updated more frequently than disease events.
+This module ensures proper temporal representation of these medical interventions.
+
+Input: merged_drug_lab.csv (combined drug and laboratory data)
+Output: {HADM_ID}-st.csv files containing quadruple-formatted structured data
+"""
+
 import pandas as pd
 from collections import defaultdict
 

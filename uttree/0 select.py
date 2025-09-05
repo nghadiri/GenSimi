@@ -1,3 +1,34 @@
+"""
+Data Selection Module - UTTree Patient Similarity Pipeline
+
+This module implements the first step in the UTTree (Unstructured Temporal Tree) methodology
+for patient similarity assessment. It filters MIMIC-III dataset files to create a subset
+of selected patients for analysis.
+
+Based on the methodology described in:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+The UTTree methodology combines structured and unstructured EMR data using a tree structure
+to represent patient information temporally. This module handles the data preprocessing phase
+by selecting relevant patient records from the full MIMIC-III dataset.
+
+Input: Full MIMIC-III CSV files and a list of selected subject IDs
+Output: Filtered CSV files containing only the selected patients' data
+
+Files processed:
+- PATIENTS.csv: Patient demographics
+- ADMISSIONS.csv: Hospital admissions
+- LABEVENTS.csv: Laboratory test results
+- NOTEEVENTS.csv: Clinical notes
+- PRESCRIPTIONS.csv: Medication prescriptions
+- PROCEDURES_ICD.csv: Procedure codes
+- DIAGNOSES_ICD.csv: Diagnosis codes
+
+This filtering step is essential for creating manageable datasets while ensuring all related
+medical events for selected patients are preserved across different data types.
+"""
+
 import pandas as pd
 import os
 #import sys

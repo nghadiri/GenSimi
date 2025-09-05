@@ -1,3 +1,47 @@
+"""
+Patient Clustering Analysis - UTTree Downstream Task
+
+This module performs clustering analysis on patient embeddings generated
+from the UTTree methodology, implementing downstream tasks for evaluation.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Clustering Analysis Features:
+
+1. K-Means Clustering:
+   - Applies K-means algorithm to standardized patient vectors
+   - Groups patients with similar temporal medical patterns
+   - Generates cluster visualizations and statistics
+
+2. Hierarchical Clustering:
+   - Uses Ward linkage method for hierarchical clustering
+   - Creates dendrograms showing patient similarity relationships
+   - Labels clusters with Patient ID and Admission ID combinations
+
+3. Analysis Options:
+   - _last_adm_only: Analyzes only the most recent admission per patient
+   - _hier: Enables hierarchical clustering with dendrogram visualization
+   - _kmeans: Enables K-means clustering analysis
+
+4. Downstream Task Evaluation:
+   According to the methodology, clustering serves as a downstream task to:
+   - Validate the quality of patient representations
+   - Assess temporal pattern capture effectiveness
+   - Compare with baseline patient similarity methods
+
+The patient vectors input to this module should be generated from Doc2Vec
+processing of the temporal tree sequences, creating fixed-length embeddings
+that capture both medical event co-occurrences and temporal relationships.
+
+Results demonstrate the UTTree model's ability to group patients with
+similar medical trajectories and treatment patterns.
+
+Input: subj_hadm_vectors.csv (patient embedding vectors from Doc2Vec)
+Output: Clustering visualizations and analysis results
+"""
+
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler

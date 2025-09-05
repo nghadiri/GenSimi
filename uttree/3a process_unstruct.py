@@ -1,3 +1,39 @@
+"""
+Unstructured Data Processor - UTTree Quadruple Generation
+
+This module processes extracted medical concepts from clinical notes (cui.csv)
+and converts them into standardized quadruple format for temporal tree construction.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Processing Steps:
+1. Groups extracted concepts by hospital admission (HADM_ID)
+2. Creates temporal ordering based on chart dates
+3. Assigns temporal event types based on clinical section:
+   - 'Retro': Past medical history concepts (retrospective data)
+   - 'NewFinding': Current visit disease findings (long-lasting effects)
+
+4. Converts to Quadruple Format:
+   - Time: Sequential time window (1, 2, 3, ...)
+   - TemporalEventType: Retro or NewFinding
+   - Event: 'DiseaseDisorderMention' for disease entities
+   - Value: UMLS canonical name of the medical concept
+
+Key Features:
+- Filters for DISEASE label entities only
+- Maps section categories to temporal event types
+- Creates time-ordered sequences for each admission
+- Outputs separate files for each admission's unstructured data
+
+This module transforms raw NLP extraction results into the standardized
+quadruple format required for temporal tree construction in the UTTree model.
+
+Input: cui.csv (extracted medical concepts with UMLS mappings)
+Output: {HADM_ID}-unst.csv files containing quadruple-formatted unstructured data
+"""
+
 import pandas as pd
 from collections import defaultdict
 

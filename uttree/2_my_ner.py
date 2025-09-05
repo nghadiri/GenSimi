@@ -1,3 +1,48 @@
+"""
+Named Entity Recognition Module - UTTree Unstructured Data Processing
+
+This module implements the unstructured data processing component of the UTTree methodology,
+extracting medical concepts from clinical notes using NLP techniques.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Unstructured Data Processing Pipeline:
+1. Clinical Note Sectioning:
+   - Uses MedspaCy for automatic section detection
+   - Handles flexible formatting in clinical notes
+   - Identifies sections like 'past medical history', 'present illness', etc.
+
+2. Named Entity Recognition (NER):
+   - Extracts medical entities using ScispaCy (BC5CDR model)
+   - Identifies diseases, signs, symptoms from clinical text
+   - Handles medical jargon, abbreviations, and incomplete sentences
+
+3. Concept Encoding and UMLS Mapping:
+   - Maps extracted terms to UMLS (Unified Medical Language System)
+   - Standardizes different expressions of the same disease
+   - Uses MetaMap for concept similarity scoring
+
+4. Temporal Event Classification:
+   - Assigns temporal roles based on section headers:
+     * 'Retro': Past medical history concepts
+     * 'NewFinding': Current visit findings with long-lasting effects
+   - Processes negation using NegEx
+
+Key Libraries:
+- MedspaCy: Clinical text sectioning
+- ScispaCy: Medical NER with BC5CDR model
+- NegSpacy: Negation detection
+- UMLS Linker: Concept standardization
+
+Input: NOTEEVENTS.csv with clinical notes
+Output: cui.csv with extracted concepts and UMLS mappings
+
+This creates the foundation for temporal tree construction by providing
+standardized medical concepts from unstructured clinical narratives.
+"""
+
 #pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.0/en_ner_bc5cdr_md-0.5.0.tar.gz
 #https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_ner_bc5cdr_md-0.5.1.tar.gz
 #up to 0.5.4

@@ -1,3 +1,40 @@
+"""
+Data Merger - UTTree Structured and Unstructured Integration
+
+This module merges structured and unstructured quadruple data files to create
+unified temporal datasets for each hospital admission in the UTTree pipeline.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Integration Process:
+1. Identifies matching structured (-st.csv) and unstructured (-unst.csv) files
+2. Combines both data types for each admission using pandas concatenation
+3. Sorts merged data by temporal sequence (Time column)
+4. Creates complete temporal records containing both:
+   - Structured data: Drugs, lab results (RealTime events)
+   - Unstructured data: Disease findings, medical history (Retro/NewFinding events)
+
+Key Features:
+- Handles cases where only one data type exists for an admission
+- Maintains temporal ordering across combined data sources
+- Creates unified input files for tree construction phase
+- Organizes output in 'merged' subdirectory
+
+This integration step is crucial for the UTTree methodology as it enables
+the temporal tree to capture relationships between both structured medical
+interventions and unstructured clinical observations within the same
+time windows.
+
+The merged data provides the foundation for creating four-level temporal
+trees where medical events from different sources can be compared and
+related through the Weisfeiler-Lehman relabeling process.
+
+Input: {HADM_ID}-st.csv and {HADM_ID}-unst.csv files
+Output: {HADM_ID}-merged.csv files containing integrated temporal data
+"""
+
 import pandas as pd
 from collections import defaultdict
 

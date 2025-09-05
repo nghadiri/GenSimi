@@ -1,4 +1,50 @@
 # -*- coding: utf-8 -*-
+"""
+Temporal Tree Construction and Relabeling - UTTree Core Algorithm
+
+This module implements the core UTTree algorithm for creating temporal trees
+and applying Weisfeiler-Lehman relabeling to generate patient representations.
+
+Based on the UTTree methodology from:
+"A study into patient similarity through representation learning from medical records"
+by Memarzadeh et al. (2022)
+
+Tree Construction and Relabeling Process:
+
+1. Four-Level Tree Structure:
+   - Level 1: Patient identifier (root)
+   - Level 2: Time windows (subtrees for each unique time period)
+   - Level 3: Temporal event types (Retro, NewFinding, RealTime branches)
+   - Level 4: Medical events (leaf nodes with actual medical data)
+
+2. Temporal Tree Creation:
+   - Creates subtrees for each non-empty time window (1-day windows)
+   - Adds branches for each temporal event type present in the data
+   - Populates leaf nodes with Event-Value pairs from quadruple data
+
+3. Weisfeiler-Lehman Relabeling:
+   - Level 4 → 3: Relabels temporal event type nodes based on child medical events
+   - Level 3 → 2: Relabels time window nodes based on event type combinations
+   - Level 2 → 1: Relabels root node based on all time window combinations
+   
+4. Tree Traversal and Sequence Generation:
+   - Uses Breadth-First Search (BFS) to traverse the relabeled tree
+   - Generates sequences that capture co-occurrence of medical events
+   - Creates final patient representation string
+
+Key Features:
+- Removes empty branches (temporal event types with no medical events)
+- Captures temporal relationships between medical events
+- Uses modified Weisfeiler-Lehman kernel for graph comparison
+- Generates rich compound sequences for document representation
+
+The resulting sequences serve as input to Doc2Vec for creating patient embeddings
+that capture both temporal patterns and medical event co-occurrences.
+
+Input: {HADM_ID}-merged.csv files with integrated temporal data
+Output: {HADM_ID}-merged.txt files containing BFS traversal sequences
+"""
+
 import os
 import pandas as pd
 import networkx as nx
